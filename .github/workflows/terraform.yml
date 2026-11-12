@@ -1,0 +1,108 @@
+name: terraform-cicd
+
+# Runs on every Pull Request: fmt -> init -> validate -> plan.
+# apply is manual (workflow_dispatch + GitHub Environment approval),
+# never automatic from an unprotected branch.
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to apply"
+        type: choice
+        options: [dev, test, prod]
+        required: true
+      apply:
+        description: "Run terraform apply after plan"
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write   # OIDC federation (no long-lived keys in Git)
+  contents: read
+
+jobs:
+  quality:
+    name: fmt / init / validate / plan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, test, prod]
+
+    defaults:
+      run:
+        working-directory: environments/${{ matrix.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Configure AWS credentials (OIDC, no secrets)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: terraform fmt -check -recursive
+        run: terraform fmt -check -recursive
+
+      - name: terraform init
+        run: terraform init -input=false
+
+      - name: terraform validate
+        run: terraform validate
+
+      - name: terraform plan
+        run: |
+          terraform plan -input=false -out=tfplan
+          terraform show -no-color tfplan > plan.txt
+
+      - name: Keep plan as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ matrix.environment }}
+          path: |
+            environments/${{ matrix.environment }}/plan.txt
+          retention-days: 7
+
+  apply:
+    name: apply (manual approval)
+    needs: quality
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    # GitHub Environment: test and prod require a manual approval here.
+    environment: ${{ inputs.environment }}
+
+    defaults:
+      run:
+        working-directory: environments/${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Configure AWS credentials (OIDC, no secrets)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: terraform init
+        run: terraform init -input=false
+
+      - name: terraform apply (reviewed plan)
+        if: inputs.apply == true
+        run: terraform apply -input=false -auto-approve
