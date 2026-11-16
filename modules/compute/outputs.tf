@@ -14,6 +14,6 @@ output "launch_template_id" {
 }
 
 output "ami_id" {
-  description = "AMI used by the launch template (provided by variable)"
-  value       = var.image_id
+  description = "AMI used by the launch template (Ubuntu 22.04, looked up via data source)"
+  value       = data.aws_ami.ubuntu.id
 }
