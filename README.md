@@ -128,8 +128,11 @@ pour `test` et `prod`. Aucun déploiement automatique depuis une branche non pro
 ## Coûts et limites
 
 - Voir `docs/costs.md` (~0,25 $ pour 2 h de démonstration, NAT GW à détruire).
-- **Limites AWS Academy** : RDS/IAM peuvent être restreints selon le compte ;
-  le code reste valable sur un compte AWS standard.
+- **Limites AWS Academy** : selon le lab, `iam:CreateRole`, `s3:CreateBucket`, RDS ou
+  même `ec2:CreateVpc` peuvent être refusés. Le projet intègre des flags
+  `enable_iam` / `enable_storage` / `enable_database` (défaut `true`) pour dégrader
+  proprement, et l'AMI est fournie par variable (`modules/compute`). Sur un compte AWS
+  standard, tout est déployé sans flag.
 
 ## Dépannage
 

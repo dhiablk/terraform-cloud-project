@@ -34,11 +34,11 @@ output "asg_name" {
 }
 
 output "rds_endpoint" {
-  description = "RDS endpoint (private)"
-  value       = module.database.rds_endpoint
+  description = "RDS endpoint (private; null when enable_database = false)"
+  value       = var.enable_database ? module.database[0].rds_endpoint : null
 }
 
 output "assets_bucket" {
-  description = "S3 bucket for assets/logs/backups"
-  value       = module.storage.bucket_id
+  description = "S3 bucket for assets/logs/backups (null when enable_storage = false)"
+  value       = var.enable_storage ? module.storage[0].bucket_id : null
 }

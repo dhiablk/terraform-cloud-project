@@ -93,6 +93,7 @@ data "aws_iam_policy_document" "instance_assume" {
 }
 
 resource "aws_iam_role" "instance" {
+  count              = var.create_iam_role ? 1 : 0
   name               = "${var.project_name}-${var.environment}-instance-role"
   description        = "Least-privilege role for application instances"
   assume_role_policy = data.aws_iam_policy_document.instance_assume.json
@@ -102,11 +103,13 @@ resource "aws_iam_role" "instance" {
 
 # Minimal managed policies: SSM session access only. No broad access.
 resource "aws_iam_role_policy_attachment" "ssm" {
-  role       = aws_iam_role.instance.name
+  count      = var.create_iam_role ? 1 : 0
+  role       = aws_iam_role.instance[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_instance_profile" "instance" {
-  name = "${var.project_name}-${var.environment}-instance-profile"
-  role = aws_iam_role.instance.name
+  count = var.create_iam_role ? 1 : 0
+  name  = "${var.project_name}-${var.environment}-instance-profile"
+  role  = aws_iam_role.instance[0].name
 }

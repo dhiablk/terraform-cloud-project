@@ -11,3 +11,11 @@ instance_type       = "t3.micro"
 min_size            = 2
 max_size            = 2
 db_instance_class   = "db.t3.micro"
+
+# Service toggles (Academy compatibility):
+# - enable_iam     : false on AWS Academy (iam:CreateRole denied)
+# - enable_storage : false on AWS Academy (s3:CreateBucket denied)
+# - enable_database: false for a web-only demo or when RDS is unavailable
+enable_iam     = true
+enable_storage = true
+enable_database = true

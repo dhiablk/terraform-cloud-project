@@ -1,15 +1,15 @@
 #!/bin/bash
 # Installs a lightweight web server showing the instance hostname.
 # Refreshing the ALB URL repeatedly shows load distribution across instances.
+# NOTE: uses apt (Canonical Ubuntu AMI) because AWS Academy denies
+# ec2:DescribeImages, preventing dynamic AL2023 AMI lookup.
 
-dnf update -y
-dnf install -y nginx
+apt-get update -y
+apt-get install -y nginx
 systemctl enable --now nginx
 
 HOST=$(hostname)
-ZONE=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone 2>/dev/null || echo "unknown")
-cat > /usr/share/nginx/html/index.html <<EOF
+cat > /var/www/html/index.html <<EOF
 <h1>Terraform Cloud Project</h1>
 <p>Host: ${HOST}</p>
-<p>AZ: ${ZONE}</p>
 EOF

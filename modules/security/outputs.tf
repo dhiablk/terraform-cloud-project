@@ -14,6 +14,6 @@ output "db_security_group_id" {
 }
 
 output "instance_profile_name" {
-  description = "Name of the instance profile attached to the ASG instances"
-  value       = aws_iam_instance_profile.instance.name
+  description = "Name of the instance profile attached to the ASG instances (empty when create_iam_role = false)"
+  value       = var.create_iam_role ? aws_iam_instance_profile.instance[0].name : ""
 }

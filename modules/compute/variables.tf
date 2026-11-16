@@ -56,6 +56,12 @@ variable "max_size" {
   default     = 4
 }
 
+variable "image_id" {
+  description = "AMI for the launch template. Default: Canonical Ubuntu AMI validated in AWS Academy (ec2:DescribeImages denied there, so no data.aws_ami lookup)"
+  type        = string
+  default     = "ami-0d15c1984ab81de8f"
+}
+
 variable "user_data" {
   description = "Base64-encoded user data script for the launch template"
   type        = string

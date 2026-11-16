@@ -86,3 +86,21 @@ variable "db_master_password" {
   type        = string
   sensitive   = true
 }
+
+variable "enable_iam" {
+  description = "Create instance IAM role/profile (false on AWS Academy: iam:CreateRole denied)"
+  type        = bool
+  default     = true
+}
+
+variable "enable_database" {
+  description = "Deploy the RDS module (false when RDS is unavailable or for web-only demos)"
+  type        = bool
+  default     = true
+}
+
+variable "enable_storage" {
+  description = "Deploy the S3 assets module (false on AWS Academy: s3:CreateBucket denied)"
+  type        = bool
+  default     = true
+}

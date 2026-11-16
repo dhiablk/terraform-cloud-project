@@ -23,3 +23,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "create_iam_role" {
+  description = "Create the instance IAM role and profile (false on AWS Academy where iam:CreateRole is denied)"
+  type        = bool
+  default     = true
+}

@@ -30,11 +30,12 @@ module "network" {
 module "security" {
   source = "../../modules/security"
 
-  project_name = var.project_name
-  environment  = var.environment
-  vpc_id       = module.network.vpc_id
-  vpc_cidr     = var.vpc_cidr
-  tags         = local.common_tags
+  project_name    = var.project_name
+  environment     = var.environment
+  vpc_id          = module.network.vpc_id
+  vpc_cidr        = var.vpc_cidr
+  create_iam_role = var.enable_iam
+  tags            = local.common_tags
 }
 
 # ---------------------------------------------------------- load-balancer
@@ -71,6 +72,7 @@ module "compute" {
 # --------------------------------------------------------------- database
 
 module "database" {
+  count  = var.enable_database ? 1 : 0
   source = "../../modules/database"
 
   project_name         = var.project_name
@@ -88,6 +90,7 @@ module "database" {
 data "aws_caller_identity" "current" {}
 
 module "storage" {
+  count  = var.enable_storage ? 1 : 0
   source = "../../modules/storage"
 
   project_name  = var.project_name

@@ -3,18 +3,20 @@
 resource "aws_launch_template" "app" {
   name_prefix   = "${var.project_name}-${var.environment}-lt-"
   description   = "Launch template for the web application instances"
-  image_id      = data.aws_ami.al2023.id
+  image_id      = var.image_id
   instance_type = var.instance_type
 
-  iam_instance_profile {
-    name = var.instance_profile_name
+  dynamic "iam_instance_profile" {
+    for_each = var.instance_profile_name != "" ? [1] : []
+    content {
+      name = var.instance_profile_name
+    }
   }
 
   network_interfaces {
     associate_public_ip_address = false
     security_groups             = [var.app_security_group_id]
   }
-
   user_data = var.user_data
 
   metadata_options {
@@ -25,21 +27,6 @@ resource "aws_launch_template" "app" {
     resource_type = "instance"
 
     tags = merge(var.tags, { Name = "${var.project_name}-${var.environment}-app" })
-  }
-}
-
-data "aws_ami" "al2023" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-2023.*-x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
   }
 }
 

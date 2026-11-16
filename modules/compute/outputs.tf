@@ -14,6 +14,6 @@ output "launch_template_id" {
 }
 
 output "ami_id" {
-  description = "AMI used by the launch template"
-  value       = data.aws_ami.al2023.id
+  description = "AMI used by the launch template (provided by variable)"
+  value       = var.image_id
 }
